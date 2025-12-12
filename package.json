@@ -1,10 +1,10 @@
 {
-  "name": "ygopro-price-proxy",
+  "name": "ygopro-proxy",
   "type": "module",
   "dependencies": {
-    "express": "^4.19.0",
-    "node-fetch": "^3.3.2",
     "cors": "^2.8.5",
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.4.5",
+    "express": "^4.19.0",
+    "node-fetch": "^3.3.2"
   }
 }
