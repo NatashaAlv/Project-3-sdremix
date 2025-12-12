@@ -12,31 +12,26 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start;
-      min-height: 100vh;
-      margin: 0;
       padding: 2em 1em;
+      min-height: 100vh;
     }
 
     header {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      text-align: center;
       margin-bottom: 2em;
     }
 
     header img {
       width: 500px;
+      max-width: 90%;
       height: auto;
       margin-bottom: 1em;
     }
 
     h1 {
       margin: 0;
-      font-size: 2rem;
-      text-align: center;
       color: #f5c518;
-      font-family: 'Georgia', 'Times New Roman', serif;
+      font-family: 'Georgia', serif;
     }
 
     input {
@@ -49,7 +44,6 @@
       text-align: center;
       background: #ffffff;
       color: #000000;
-      transition: box-shadow 0.3s ease;
     }
 
     input:focus {
@@ -68,28 +62,16 @@
 
     .card {
       width: 200px;
-      text-align: center;
       background: #1b1b1b;
       padding: 15px;
       border-radius: 10px;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      text-align: center;
     }
-
-    /* .card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.15);
-    } */
 
     .card img {
       width: 100%;
-      height: auto;
       border-radius: 6px;
       margin-bottom: 10px;
-    }
-
-    .card p {
-      margin: 0;
-      font-size: 1rem;
     }
   </style>
 </head>
@@ -113,6 +95,8 @@
         return;
       }
 
+      results.innerHTML = "<p>Loading...</p>";
+
       const proxy = "https://corsproxy.io/?";
       const url = `https://db.ygoprodeck.com/api/v7/cardinfo.php?fname=${encodeURIComponent(query)}`;
 
@@ -120,26 +104,37 @@
         const res = await fetch(proxy + url);
         const data = await res.json();
 
-        if (data.data) {
-          results.innerHTML = data.data.slice(0, 10).map(card => `
-            <div class="card">
-              <img src="${card.card_images[0].image_url}" alt="${card.name}" />
-              <p>${card.name}</p>
-            </div>
-          `).join("");
-        } else {
-          results.innerHTML = `<p>No results found.</p>`;
+        if (!data.data) {
+          results.innerHTML = "<p>No results found.</p>";
+          return;
         }
 
+        const cards = data.data.slice(0, 10);
+        results.innerHTML = "";
+
+        for (const card of cards) {
+          // Get card price from your backend
+          const priceRes = await fetch(`http://localhost:3000/price?name=${encodeURIComponent(card.name)}`);
+          const priceData = await priceRes.json();
+
+          const price = priceData?.data?.prices?.low ?? "N/A";
+
+          results.innerHTML += `
+            <div class="card">
+              <img src="${card.card_images[0].image_url}" alt="${card.name}">
+              <p>${card.name}</p>
+              <p>Price: $${price}</p>
+            </div>
+          `;
+        }
       } catch (err) {
         console.error(err);
-        results.innerHTML = `<p>Error fetching cards.</p>`;
+        results.innerHTML = "<p>Error fetching cards.</p>";
       }
     }
 
     input.addEventListener("input", e => {
-      const query = e.target.value.trim();
-      searchCards(query);
+      searchCards(e.target.value.trim());
     });
   </script>
 </body>
