@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yu Gi Oh! API Card Library</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #000000;
+      color: #eee;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      margin: 0;
+      padding: 2em 1em;
+    }
+
+    header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 2em;
+    }
+
+    header img {
+      width: 500px;
+      height: auto;
+      margin-bottom: 1em;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 2rem;
+      text-align: center;
+      color: #f5c518;
+      font-family: 'Georgia', 'Times New Roman', serif;
+    }
+
+    input {
+      padding: 10px 14px;
+      font-size: 18px;
+      width: 300px;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+      text-align: center;
+      background: #ffffff;
+      color: #000000;
+      transition: box-shadow 0.3s ease;
+    }
+
+    input:focus {
+      box-shadow: 0 0 8px #f5c518;
+    }
+
+    .cards {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 30px;
+      width: 100%;
+      max-width: 1000px;
+    }
+
+    .card {
+      width: 200px;
+      text-align: center;
+      background: #1b1b1b;
+      padding: 15px;
+      border-radius: 10px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    /* .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.15);
+    } */
+
+    .card img {
+      width: 100%;
+      height: auto;
+      border-radius: 6px;
+      margin-bottom: 10px;
+    }
+
+    .card p {
+      margin: 0;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="logo.png" alt="YGOPRO Logo">
+    <h1>Card Library</h1>
+  </header>
+
+  <input type="text" id="search" placeholder="Search cards..." />
+
+  <div id="results" class="cards"></div>
+
+  <script>
+    const input = document.getElementById("search");
+    const results = document.getElementById("results");
+
+    async function searchCards(query) {
+      if (!query) {
+        results.innerHTML = "";
+        return;
+      }
+
+      const proxy = "https://corsproxy.io/?";
+      const url = `https://db.ygoprodeck.com/api/v7/cardinfo.php?fname=${encodeURIComponent(query)}`;
+
+      try {
+        const res = await fetch(proxy + url);
+        const data = await res.json();
+
+        if (data.data) {
+          results.innerHTML = data.data.slice(0, 10).map(card => `
+            <div class="card">
+              <img src="${card.card_images[0].image_url}" alt="${card.name}" />
+              <p>${card.name}</p>
+            </div>
+          `).join("");
+        } else {
+          results.innerHTML = `<p>No results found.</p>`;
+        }
+
+      } catch (err) {
+        console.error(err);
+        results.innerHTML = `<p>Error fetching cards.</p>`;
+      }
+    }
+
+    input.addEventListener("input", e => {
+      const query = e.target.value.trim();
+      searchCards(query);
+    });
+  </script>
+</body>
+</html>
