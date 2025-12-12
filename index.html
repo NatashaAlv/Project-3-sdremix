@@ -46,6 +46,10 @@
       color: #000000;
     }
 
+    input:focus {
+      box-shadow: 0 0 8px #f5c518;
+    }
+
     .cards {
       display: flex;
       flex-wrap: wrap;
@@ -109,17 +113,11 @@
         results.innerHTML = "";
 
         for (const card of cards) {
+          // Get card price from your backend
           const priceRes = await fetch(`http://localhost:3000/price?name=${encodeURIComponent(card.name)}`);
           const priceData = await priceRes.json();
 
-          let price = "N/A";
-
-          if (priceData?.data?.length > 0) {
-            const variants = priceData.data[0].variants;
-            if (Array.isArray(variants) && variants.length > 0) {
-              price = variants[0].price ?? "N/A";
-            }
-          }
+          const price = priceData?.data?.prices?.low ?? "N/A";
 
           results.innerHTML += `
             <div class="card">
